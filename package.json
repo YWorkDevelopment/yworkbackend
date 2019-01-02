@@ -1,0 +1,13 @@
+{
+  "name": "yworkbackend",
+  "version": "1.0.0",
+  "private": true,
+  "main": "./api/index.js",
+  "scripts": {
+    "deploy": "./deploy.cmd"
+  },
+  "dependencies": {
+    "express": "^4.16.4",
+    "nodemailer": "^5.0.0"
+  }
+}
