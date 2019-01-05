@@ -29,25 +29,24 @@ const Headers = {
 };
 
 app.post("*", (req, res) => {
-  if (
-    req.body.captcha === undefined ||
-    req.body.captcha === "" ||
-    req.body.captcha === null
-  )
-    return res.json({ success: false, ycode: "NOCAPTCHA" });
+  const captcha = req.body.captcha;
+  const mail = req.body.mail;
+
+  if (captcha === undefined || captcha === "" || captcha === null)
+    return res.json({ success: false, code: "NOCAPTCHA" });
 
   const secretKey = process.env.CAPTCHA_SECRET;
-  const verifyURL = `https://www.google.com/recaptcha/api/siteverify?secret=${secretKey}&response=${
-    req.body.captcha
-  }&remoteip=${req.connection.remoteAddress}`;
+  const verifyURL = `https://www.google.com/recaptcha/api/siteverify?secret=${secretKey}&response=${captcha}&remoteip=${
+    req.connection.remoteAddress
+  }`;
 
   request(verifyURL, (err, req, body) => {
     body = JSON.parse(body);
 
     if (body.success !== undefined && !body.success)
-      return res.json({ success: false, code: "NOSUCCESS" });
+      return res.json({ success: false, code: "NOSUCCESS", body });
 
-    const Mail = { ...Headers, text: req.query.mail };
+    const Mail = { ...Headers, text: mail };
 
     Mailer.sendMail(Mail, (error, info) => {
       if (error) return res.json({ success: false, code: "NOMAIL", error });
