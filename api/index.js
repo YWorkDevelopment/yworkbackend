@@ -8,7 +8,7 @@ const app = express();
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
-app.use(cors({ origin: "https://ywork.now.sh" }));
+app.use(cors({ origin: "https://www.ywork.ch" }));
 
 const Mailer = nodemailer.createTransport({
   service: "gmail",
@@ -23,14 +23,14 @@ const Mailer = nodemailer.createTransport({
 });
 
 const Headers = {
-  from: "YWork Server <ywork.dev@gmail.com>",
-  to: "ywork@gmx.ch",
-  subject: "YWork Kontaktanfrage"
+  from: "Y-Work Server <ywork.dev@gmail.com>",
+  to: "ywork.dev@gmail.com",
+  subject: "Y-Work Kontaktanfrage"
 };
 
 app.post("*", (req, res) => {
   const captcha = req.body.captcha;
-  const mail = req.body.mail;
+  const form = req.body.form;
 
   if (captcha === undefined || captcha === "" || captcha === null)
     return res.json({ success: false, code: "NOCAPTCHA" });
@@ -46,7 +46,33 @@ app.post("*", (req, res) => {
     if (body.success !== undefined && !body.success)
       return res.json({ success: false, code: "NOSUCCESS", body });
 
-    const Mail = { ...Headers, text: mail };
+    const html = form.isGiver
+      ? `<h1 style="margin-bottom: 0;">Arbeitgeber</h1>
+      <div>${form.name} ${form.surname}</div>
+      <div>${form.mail}</div>
+
+      <br>
+
+      <div><b>Addresse</b><br>${form.address}</div>
+      <div><b>Zeit</b><br>${form.time}</div>
+      <div><b>Frist</b><br>${form.deadline}</div>
+      <div><b>Beschreibung</b><br>${form.work.replace(/\n/g, "<br>")}</div>
+    `
+      : `<h1 style="margin-bottom: 0;">Arbeitnehmer</h1>
+      <div>${form.name} ${form.surname} <b>${form.age}</b></div>
+      <div>${form.mail}</div>
+
+      <br>
+
+      <div><b>Zeit</b><br>${form.time}</div>
+      <div><b>Mögliche Arbeiten</b><br>${form.works.replace(
+        /\n/g,
+        "<br>"
+      )}</div>
+      <div><b>Mögliche Orte</b><br>${form.places.replace(/\n/g, "<br>")}</div>
+    `;
+
+    const Mail = { ...Headers, html };
 
     Mailer.sendMail(Mail, (error, info) => {
       if (error) return res.json({ success: false, code: "NOMAIL", error });
