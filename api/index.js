@@ -24,7 +24,8 @@ const Mailer = nodemailer.createTransport({
 
 const Headers = {
   from: "Y-Work Server <ywork.dev@gmail.com>",
-  to: "ywork.dev@gmail.com",
+  to: "ywork@gmx.ch",
+  cc: "ywork.dev@gmail.com",
   subject: "Y-Work Kontaktanfrage"
 };
 
