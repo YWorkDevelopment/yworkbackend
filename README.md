@@ -1,4 +1,4 @@
-# YWork Backend
+# Y-Work Backend
 
-Official Backend of YWork.
-Visit us [here](https://ywork.now.sh).
+Official Backend of Y-Work.
+Visit us [here](https://www.ywork.ch).
