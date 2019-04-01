@@ -10,33 +10,46 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(cors({ origin: "https://www.ywork.ch" }));
 
-const Mailer = nodemailer.createTransport({
-  service: "gmail",
-  secure: false,
-  auth: {
-    user: "ywork.dev@gmail.com",
-    pass: process.env.EMAIL_TOKEN
-  },
-  tls: {
-    rejectUnauthorized: false
-  }
-});
+const {
+  CAPTCHA_SECRET,
+  OAUTH_CLIENTID,
+  OAUTH_CLIENTSECRET,
+  OAUTH_REFRESHTOKEN,
+  OAUTH_ACCESSTOKEN
+} = process.env;
 
-const Headers = {
-  from: "Y-Work Server <ywork.dev@gmail.com>",
-  to: "ywork@gmx.ch",
-  cc: "ywork.dev@gmail.com",
-  subject: "Y-Work Kontaktanfrage"
+const OAuth2 = {
+  type: "OAuth2",
+  user: "ywork.dev@gmail.com",
+  clientId: OAUTH_CLIENTID,
+  clientSecret: OAUTH_CLIENTSECRET,
+  refreshToken: OAUTH_REFRESHTOKEN,
+  accessToken: OAUTH_ACCESSTOKEN,
+  expires: 3600
 };
+
+const Mailer = nodemailer.createTransport({
+  host: "smtp.gmail.com",
+  port: 465,
+  secure: true,
+  auth: OAuth2
+});
 
 app.post("*", (req, res) => {
   const captcha = req.body.captcha;
   const form = req.body.form;
 
+  const Headers = {
+    from: "Y-Work Server <ywork.dev@gmail.com>",
+    to: "ywork@gmx.ch",
+    cc: "ywork.dev@gmail.com",
+    subject: `Y-Work Kontaktanfrage <${form.mail}>`
+  };
+
   if (captcha === undefined || captcha === "" || captcha === null)
     return res.json({ success: false, code: "NOCAPTCHA" });
 
-  const secretKey = process.env.CAPTCHA_SECRET;
+  const secretKey = CAPTCHA_SECRET;
   const verifyURL = `https://www.google.com/recaptcha/api/siteverify?secret=${secretKey}&response=${captcha}&remoteip=${
     req.connection.remoteAddress
   }`;

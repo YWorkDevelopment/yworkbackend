@@ -1,5 +1,6 @@
 {
   "version": 2,
   "builds": [{ "src": "api/index.js", "use": "@now/node-server" }],
-  "name": "ywork-backend"
+  "name": "ywork-backend",
+  "regions": ["bru"]
 }
